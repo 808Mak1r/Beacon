@@ -4,6 +4,8 @@
 *.dll
 *.so
 *.dylib
+dist
+node_modules
 
 # Test binary, built with `go test -c`
 *.test
@@ -23,3 +25,4 @@
 
 # Other
 .DS_Store
+synk/
