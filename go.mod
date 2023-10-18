@@ -2,7 +2,10 @@ module github.com/808Mak1r/Beacon
 
 go 1.21.0
 
-require github.com/gin-gonic/gin v1.9.1
+require (
+	github.com/gin-gonic/gin v1.9.1
+	github.com/google/uuid v1.3.1
+)
 
 require (
 	github.com/bytedance/sonic v1.10.2 // indirect
