@@ -8,7 +8,7 @@ import { UploadScreenshotForm } from "./home/upload_screenshot_form";
 export function Home() {
   return (
     <Layout>
-      <Header>同步传</Header>
+      <Header>烽火台</Header>
       {nav}
       <Switch>
         <Route exact path="/message">
