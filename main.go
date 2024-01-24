@@ -2,8 +2,11 @@ package main
 
 import (
 	"embed"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -11,9 +14,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 //go:embed frontend/dist/*
@@ -51,12 +51,52 @@ func TextsController(c *gin.Context) {
 	}
 }
 
+func GetUploadsDir() (uploads string) {
+	exe, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dir := filepath.Dir(exe)
+	uploads = filepath.Join(dir, "uploads")
+
+	return
+}
+
+func UploadsController(c *gin.Context) {
+	if p := c.Param("path"); p != "" {
+		target := filepath.Join(GetUploadsDir(), p)
+		c.Header("Content-Disposition", "File Transfer")
+		c.Header("Content-Transfer-Encoding", "binary")
+		c.Header("Content-Disposition", "attachment; filename="+p)
+		c.Header("Content-Type", "application/octet-stream")
+		c.File(target)
+	} else {
+		c.Status(http.StatusNotFound)
+	}
+}
+
+func AddressesController(c *gin.Context) {
+	addrs, _ := net.InterfaceAddrs()
+	var result []string
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				result = append(result, ipnet.IP.String())
+			}
+		}
+	}
+	c.JSON(http.StatusOK, map[string]interface{}{"addresses": result})
+}
+
 func main() {
 	go func() {
 		gin.SetMode(gin.DebugMode)
 		router := gin.Default()
 		staticFiles, _ := fs.Sub(FS, "frontend/dist")
+		router.GET("/api/v1/downloads/:path", UploadsController)
 		router.POST("/api/v1/texts", TextsController)
+		router.GET("/api/v1/addresses", AddressesController)
 		router.StaticFS("/static", http.FS(staticFiles))
 		router.NoRoute(func(c *gin.Context) {
 			path := c.Request.URL.Path
