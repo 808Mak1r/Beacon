@@ -6,6 +6,7 @@
 *.dylib
 dist
 node_modules
+main
 
 # Test binary, built with `go test -c`
 *.test
@@ -26,3 +27,4 @@ node_modules
 # Other
 .DS_Store
 synk/
+uploads/

@@ -102,7 +102,35 @@ func QrcodesController(c *gin.Context) {
 	}
 }
 
+func FilesController(c *gin.Context) {
+	file, err := c.FormFile("raw")
+	if err != nil {
+		log.Fatal(err)
+	}
+	exe, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	dir := filepath.Dir(exe)
+	if err != nil {
+		log.Fatal(err)
+	}
+	filename := uuid.New().String()
+	uploads := filepath.Join(dir, "uploads")
+	err = os.MkdirAll(uploads, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fullpath := path.Join("uploads", filename+filepath.Ext(file.Filename))
+	fileErr := c.SaveUploadedFile(file, filepath.Join(dir, fullpath))
+	if fileErr != nil {
+		log.Fatal(fileErr)
+	}
+	c.JSON(http.StatusOK, gin.H{"url": "/" + fullpath})
+}
+
 func main() {
+	port := "27149"
 	go func() {
 		gin.SetMode(gin.DebugMode)
 		router := gin.Default()
@@ -111,6 +139,7 @@ func main() {
 		router.GET("/api/v1/qrcodes", QrcodesController)
 		router.GET("/api/v1/addresses", AddressesController)
 		router.POST("/api/v1/texts", TextsController)
+		router.POST("/api/v1/files", FilesController)
 		router.StaticFS("/static", http.FS(staticFiles))
 		router.NoRoute(func(c *gin.Context) {
 			path := c.Request.URL.Path
@@ -129,13 +158,13 @@ func main() {
 				c.Status(http.StatusNotFound)
 			}
 		})
-		router.Run(":8080")
+		router.Run(":" + port)
 	}()
 
 	macChromePath := "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 	macEdgePath := "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
 	_ = macChromePath
-	cmd := exec.Command(macEdgePath, "--app=http://127.0.0.1:8080/static/index.html")
+	cmd := exec.Command(macEdgePath, "--app=http://127.0.0.1:"+port+"/static/index.html")
 	cmd.Start()
 
 	chSignal := make(chan os.Signal, 1)
