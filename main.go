@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/808Mak1r/Beacon/config"
 	"github.com/808Mak1r/Beacon/server"
 	"os"
 	"os/exec"
@@ -24,7 +25,7 @@ func listenToInterrupt() (chSignal chan os.Signal) {
 }
 
 func main() {
-	port := "27149"
+	port := config.GetPort()
 	go server.Run(port)
 
 	cmd := startBrowser(port)

@@ -3,6 +3,7 @@ package server
 import (
 	"embed"
 	c "github.com/808Mak1r/Beacon/server/controller"
+	"github.com/808Mak1r/Beacon/server/ws"
 	"github.com/gin-gonic/gin"
 	"io/fs"
 	"log"
@@ -25,6 +26,11 @@ func Run(port string) {
 		api.POST("/texts", c.TextsController)
 		api.POST("/files", c.FilesController)
 	}
+	hub := ws.NewHub()
+	go hub.Run()
+	router.GET("/ws", func(c *gin.Context) {
+		ws.HttpController(c, hub)
+	})
 
 	router.StaticFS("/static", http.FS(staticFiles))
 	router.NoRoute(func(c *gin.Context) {
