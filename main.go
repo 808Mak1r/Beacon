@@ -6,13 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"runtime"
 )
 
 func startBrowser(port string) (cmd *exec.Cmd) {
-	macChromePath := "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-	macEdgePath := "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
-	_ = macChromePath
-	cmd = exec.Command(macEdgePath, "--app=http://127.0.0.1:"+port+"/static/index.html")
+	cmd = exec.Command(getBrowserPath(), "--app=http://127.0.0.1:"+port+"/static/index.html")
 	cmd.Start()
 	return
 }
@@ -21,6 +19,22 @@ func listenToInterrupt() (chSignal chan os.Signal) {
 	chSignal = make(chan os.Signal, 1)
 	// 获取 Interrupt 信号到chan中
 	signal.Notify(chSignal, os.Interrupt)
+	return
+}
+
+func getBrowserPath() (browserPath string) {
+	switch runtime.GOOS {
+	case "darwin":
+		browserPath = "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+		if _, err := os.Stat(browserPath); err != nil {
+			browserPath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+		}
+	case "windows":
+		browserPath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+		if _, err := os.Stat(browserPath); err != nil {
+			browserPath = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+		}
+	}
 	return
 }
 
