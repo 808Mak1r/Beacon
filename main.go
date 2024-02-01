@@ -31,8 +31,16 @@ func main() {
 	cmd := startBrowser(port)
 
 	chSignal := listenToInterrupt()
+	chBrowserDie := make(chan error)
+	go func() {
+		chBrowserDie <- cmd.Wait()
+	}()
 
+	select {
 	// 阻塞等待 Interrupt 信号
-	<-chSignal
-	cmd.Process.Kill()
+	case <-chSignal:
+		cmd.Process.Kill()
+	case <-chBrowserDie:
+		os.Exit(0)
+	}
 }
