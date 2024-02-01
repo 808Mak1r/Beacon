@@ -75,6 +75,22 @@ jobs:
         run: |
           go get -v -t -d ./...
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'latest'
+
+      - name: Install pnpm and dependencies
+        run: |
+          npm install -g pnpm
+          cd server/frontend
+          pnpm install
+
+      - name: Build
+        run: |
+          cd server/frontend
+          pnpm build
+
       - name: Build binary
         id: builder
         run: |
