@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+dist/
 node_modules
 main
 Beacon
