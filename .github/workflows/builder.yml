@@ -158,6 +158,7 @@ jobs:
         run: |
           cd package
           find . -type f -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          mv ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt $GITHUB_WORKSPACE/
 
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
