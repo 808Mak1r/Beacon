@@ -157,8 +157,15 @@ jobs:
         shell: bash
         run: |
           cd package
-          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
-          mv ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt $GITHUB_WORKSPACE/
+          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ matrix.goos }}-${{ matrix.goarch }}-checksums.txt
+          mv ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ matrix.goos }}-${{ matrix.goarch }}-checksums.txt $GITHUB_WORKSPACE/
+
+      - name: Upload checksums
+        if: steps.is-release.outputs.IS_RELEASE
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ matrix.goos }}-${{ matrix.goarch }}-checksums.txt
 
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
@@ -166,7 +173,27 @@ jobs:
         with:
           body: ${{ steps.release_notes.outputs.body }}
           files: |
-            ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+#            ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
             ${{ steps.package.outputs.PKG_PATH }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  collect:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Combine checksums
+        run: cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+
+      - name: Publish archives and packages
+        uses: softprops/action-gh-release@v1
+        if: steps.is-release.outputs.IS_RELEASE
+        with:
+          # body: ${{ steps.release_notes.outputs.body }}
+          files: |
+            ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
