@@ -52,6 +52,14 @@ jobs:
         with:
           go-version: 1.21
 
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: Check out code base
         if: github.event_name == 'push'
         uses: actions/checkout@v3
@@ -79,7 +87,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
+          node-version: 20
 
       - name: Install pnpm and dependencies
         run: |
@@ -181,18 +189,19 @@ jobs:
   collect:
     needs: build
     runs-on: ubuntu-latest
+    if: needs.build.outputs.is-release
     steps:
       - name: Download all artifacts
-        if: steps.is-release.outputs.IS_RELEASE
+        if: needs.build.outputs.is-release
         uses: actions/download-artifact@v4
 
       - name: Combine checksums
-        if: steps.is-release.outputs.IS_RELEASE
+        if: needs.build.outputs.is-release
         run: cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
-        if: steps.is-release.outputs.IS_RELEASE
+        if: needs.build.outputs.is-release
         with:
           # body: ${{ steps.release_notes.outputs.body }}
           files: |
