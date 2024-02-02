@@ -24,27 +24,34 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: ${{ matrix.job.GOOS }}-${{ matrix.job.GOARCH }} (${{ matrix.job.os }})
+    runs-on: ${{ matrix.job.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ linux, windows, darwin ]
-        arch: [ amd64, 386, arm64 ]
+        job:
+          - { GOOS: "windows", GOARCH: "amd64", os: "windows-latest" }
+          - { GOOS: "windows", GOARCH: "386", os: "windows-latest" }
+          - { GOOS: "windows", GOARCH: "arm64", os: "windows-latest" }
+          - { GOOS: "darwin", GOARCH: "amd64", os: "macos-latest" }
+          - { GOOS: "darwin", GOARCH: "arm64", os: "macos-latest" }
+          - { GOOS: "linux", GOARCH: "amd64", os: "ubuntu-latest" }
+          - { GOOS: "linux", GOARCH: "386", os: "ubuntu-latest" }
+          - { GOOS: "linux", GOARCH: "arm64", os: "ubuntu-latest" }
         include:
           - os: linux
             arch: arm
         exclude:
           - os: darwin
             arch: 386
-      fail-fast: false
-    runs-on: ubuntu-latest
     continue-on-error: true
     env:
       GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
-      GOARM: ${{ matrix.arm }}
-      GOMIPS: ${{ matrix.mips }}
-      GOMIPS64: ${{ matrix.mips64 }}
-      GOMIPSLE: ${{ matrix.mipsle }}
+#      GOARM: ${{ matrix.arm }}
+#      GOMIPS: ${{ matrix.mips }}
+#      GOMIPS64: ${{ matrix.mips64 }}
+#      GOMIPSLE: ${{ matrix.mipsle }}
     steps:
       - name: Set up Go
         uses: actions/setup-go@v4
