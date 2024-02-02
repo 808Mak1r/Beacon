@@ -198,12 +198,13 @@ jobs:
       - name: Combine checksums
         if: steps.is-release.outputs.IS_RELEASE
         run: |
+          pwd
           ls -lath
-          for file in *.zip
-          do
-            unzip $file
-          done
-          ls -lath
+          tree
+          # for file in *.zip
+          # do
+          #   unzip $file
+          # done
           cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
