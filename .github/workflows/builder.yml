@@ -173,7 +173,7 @@ jobs:
         with:
           body: ${{ steps.release_notes.outputs.body }}
           files: |
-#            ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+            # ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
             ${{ steps.package.outputs.PKG_PATH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
