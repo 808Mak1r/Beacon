@@ -38,16 +38,13 @@ jobs:
           - { GOOS: "linux", GOARCH: "amd64", os: "ubuntu-latest" }
           - { GOOS: "linux", GOARCH: "386", os: "ubuntu-latest" }
           - { GOOS: "linux", GOARCH: "arm64", os: "ubuntu-latest" }
-        include:
-          - os: linux
-            arch: arm
         exclude:
-          - os: darwin
-            arch: 386
+          - GOOS: darwin
+            GOARCH: 386
     continue-on-error: true
     env:
-      GOOS: ${{ matrix.os }}
-      GOARCH: ${{ matrix.arch }}
+      GOOS: ${{ matrix.GOOS }}
+      GOARCH: ${{ matrix.GOARCH }}
 #      GOARM: ${{ matrix.arm }}
 #      GOMIPS: ${{ matrix.mips }}
 #      GOMIPS64: ${{ matrix.mips64 }}
