@@ -148,8 +148,8 @@ jobs:
         id: release_notes
         shell: bash
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          RELEASE_NOTES=$(awk -v version="$VERSION" '/## \[/{flag=0} /## \['$version'\]/{flag=1} flag' CHANGELOG.md)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          RELEASE_NOTES=$(awk -v version="$VERSION" '/## \['$version'\]/{flag=1;next} /## \[/{flag=0} flag' CHANGELOG.md)
           echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
 
       - name: Generate checksums
@@ -157,7 +157,7 @@ jobs:
         shell: bash
         run: |
           cd package
-          find . -type f -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
           mv ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt $GITHUB_WORKSPACE/
 
       - name: Publish archives and packages
