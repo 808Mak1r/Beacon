@@ -205,7 +205,7 @@ jobs:
           # do
           #   unzip $file
           # done
-          cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -name "*-checksums.txt" -exec cat {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         if: steps.is-release.outputs.IS_RELEASE
