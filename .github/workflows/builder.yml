@@ -151,7 +151,8 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           RELEASE_NOTES=$(awk '/## \['$VERSION'\]/{flag=1;next} /## \[/ {flag=0} flag' CHANGELOG.md)
           echo $RELEASE_NOTES
-          echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
+          # echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
+          echo "::set-output name=body::${RELEASE_NOTES}"
 
       - name: Generate checksums
         if: steps.is-release.outputs.IS_RELEASE
