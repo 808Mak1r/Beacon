@@ -149,7 +149,7 @@ jobs:
         shell: bash
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          RELEASE_NOTES=$(awk -v version="$VERSION" '/## \['$version'\]/{flag=1;next} /## \[/{flag=0} flag' CHANGELOG.md)
+          RELEASE_NOTES=$(awk '/## \['$VERSION'\]/{flag=1;next} /## \[/ {flag=0} flag' CHANGELOG.md)
           echo $RELEASE_NOTES
           echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
 
@@ -196,7 +196,14 @@ jobs:
 
       - name: Combine checksums
         if: steps.is-release.outputs.IS_RELEASE
-        run: cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+        run: |
+          ls -lath
+          for file in *.zip
+          do
+            unzip $file
+          done
+          ls -lath
+          cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         if: steps.is-release.outputs.IS_RELEASE
