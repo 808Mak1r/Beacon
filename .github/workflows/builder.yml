@@ -94,6 +94,7 @@ jobs:
 
       - name: Build binary
         id: builder
+        shell: bash
         run: |
           ARGS="${GOOS}-${GOARCH}"
           go build -trimpath --ldflags "-s -w -buildid=" -v -o ./bin/${{ env.PRODUCT }}-${ARGS}
