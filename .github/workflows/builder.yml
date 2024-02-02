@@ -98,15 +98,15 @@ jobs:
         run: |
           ARGS="${GOOS}-${GOARCH}"
           go build -trimpath --ldflags "-s -w -buildid=" -v -o ./bin/${{ env.PRODUCT }}-${ARGS}
-          # echo "::set-output name=filename::${{ env.PRODUCT }}-${ARGS}"
-          echo "::set-output name=BIN_PATH::./bin/${{ env.PRODUCT }}-${ARGS}"
+          # echo "filename=${{ env.PRODUCT }}-${ARGS}" >> $GITHUB_OUTPUT
+          echo "BIN_PATH=./bin/${{ env.PRODUCT }}-${ARGS}" >> $GITHUB_OUTPUT
 
       - name: Check for release
         id: is-release
         shell: bash
         run: |
           unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/v[0-9].* ]]; then IS_RELEASE='true' ; fi
-          echo ::set-output name=IS_RELEASE::${IS_RELEASE}
+          echo "IS_RELEASE=${IS_RELEASE}" >> $GITHUB_OUTPUT
 
       - name: Extract version from tag
         if: steps.is-release.outputs.IS_RELEASE
@@ -125,7 +125,7 @@ jobs:
           TARGET="${{ matrix.job.GOOS }}-${{ matrix.job.GOARCH }}"
           PKG_BASENAME=${{ env.PRODUCT }}-${{ env.VERSION }}-${TARGET}
           PKG_NAME=${PKG_BASENAME}${PKG_suffix}
-          echo ::set-output name=PKG_NAME::${PKG_NAME}
+          echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_OUTPUT
           PKG_STAGING="./package"
           ARCHIVE_DIR="${PKG_STAGING}/${PKG_BASENAME}/"
           mkdir -p "${ARCHIVE_DIR}"
@@ -141,15 +141,16 @@ jobs:
           esac;
           popd >/dev/null
           # Let subsequent steps know where to find the compressed package
-          echo ::set-output name=PKG_PATH::"${PKG_STAGING}/${PKG_NAME}"
+          echo "PKG_PATH=${PKG_STAGING}/${PKG_NAME}" >> $GITHUB_OUTPUT
 
       - name: Extract release notes
         if: steps.is-release.outputs.IS_RELEASE
         id: release_notes
+        shell: bash
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           RELEASE_NOTES=$(awk -v version="$VERSION" '/## \[/{flag=0} /## \['$version'\]/{flag=1} flag' CHANGELOG.md)
-          echo "::set-output name=body::${RELEASE_NOTES}"
+          echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
 
       - name: Generate checksums
         if: steps.is-release.outputs.IS_RELEASE
