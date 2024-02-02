@@ -181,7 +181,6 @@ jobs:
   collect:
     needs: build
     runs-on: ubuntu-latest
-    if: steps.is-release.outputs.IS_RELEASE
     steps:
       - name: Download all artifacts
         if: steps.is-release.outputs.IS_RELEASE
