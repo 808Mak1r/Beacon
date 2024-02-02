@@ -156,7 +156,7 @@ jobs:
         shell: bash
         run: |
           cd package
-          sha256sum * > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -type f -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
