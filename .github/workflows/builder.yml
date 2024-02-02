@@ -111,6 +111,7 @@ jobs:
       - name: Extract version from tag
         if: steps.is-release.outputs.IS_RELEASE
         id: extract_version
+        shell: bash
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
@@ -122,7 +123,7 @@ jobs:
         run: |
           PKG_suffix=".tar.gz" ; case ${{ matrix.job.GOOS }} in *windows*) PKG_suffix=".zip" ;; esac;
           TARGET="${{ matrix.job.GOOS }}-${{ matrix.job.GOARCH }}"
-          PKG_BASENAME=${{ env.PRODUCT }}-v${{ env.VERSION }}-${TARGET}
+          PKG_BASENAME=${{ env.PRODUCT }}-${{ env.VERSION }}-${TARGET}
           PKG_NAME=${PKG_BASENAME}${PKG_suffix}
           echo ::set-output name=PKG_NAME::${PKG_NAME}
           PKG_STAGING="./package"
@@ -150,12 +151,20 @@ jobs:
           RELEASE_NOTES=$(awk -v version="$VERSION" '/## \[/{flag=0} /## \['$version'\]/{flag=1} flag' CHANGELOG.md)
           echo "::set-output name=body::${RELEASE_NOTES}"
 
+      - name: Generate checksums
+        if: steps.is-release.outputs.IS_RELEASE
+        shell: bash
+        run: |
+          cd package
+          sha256sum -a 256 * > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+
       - name: Publish archives and packages
         uses: softprops/action-gh-release@v1
         if: steps.is-release.outputs.IS_RELEASE
         with:
           body: ${{ steps.release_notes.outputs.body }}
           files: |
+            ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
             ${{ steps.package.outputs.PKG_PATH }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
