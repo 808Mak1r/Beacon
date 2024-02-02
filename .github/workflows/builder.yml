@@ -113,7 +113,7 @@ jobs:
         id: extract_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          echo "::set-env name=VERSION::${VERSION}" 
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create tarball
         if: steps.is-release.outputs.IS_RELEASE
