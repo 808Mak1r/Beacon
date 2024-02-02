@@ -3,6 +3,11 @@
 
 package config
 
+import (
+	"github.com/AllenDang/w32"
+	"os"
+)
+
 func init() {
 	showConsoleAsync()
 }
