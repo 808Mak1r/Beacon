@@ -183,9 +183,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
+        if: steps.is-release.outputs.IS_RELEASE
         uses: actions/download-artifact@v4
 
       - name: Combine checksums
+        if: steps.is-release.outputs.IS_RELEASE
         run: cat *-checksums.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
