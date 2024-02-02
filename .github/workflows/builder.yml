@@ -39,8 +39,7 @@ jobs:
           - { GOOS: "linux", GOARCH: "386", os: "ubuntu-latest" }
           - { GOOS: "linux", GOARCH: "arm64", os: "ubuntu-latest" }
         exclude:
-          - GOOS: darwin
-            GOARCH: 386
+          - job: { GOOS: "darwin", GOARCH: "386", os: "macos-latest" }
     continue-on-error: true
     env:
       GOOS: ${{ matrix.GOOS }}
