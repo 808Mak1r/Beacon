@@ -4,7 +4,7 @@
 package config
 
 import (
-	"github.com/AllenDang/w32"
+	w32 "github.com/gonutz/w32/v2"
 	"os"
 )
 

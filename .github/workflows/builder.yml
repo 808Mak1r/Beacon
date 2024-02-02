@@ -44,8 +44,8 @@ jobs:
           - job: { GOOS: "darwin", GOARCH: "386", os: "macos-latest" }
     continue-on-error: true
     env:
-      GOOS: ${{ matrix.GOOS }}
-      GOARCH: ${{ matrix.GOARCH }}
+      GOOS: ${{ matrix.job.GOOS }}
+      GOARCH: ${{ matrix.job.GOARCH }}
     steps:
       - name: Set up Go
         uses: actions/setup-go@v4
