@@ -100,13 +100,22 @@ jobs:
           # echo "::set-output name=filename::${{ env.PRODUCT }}-${ARGS}"
           echo "::set-output name=BIN_PATH::./bin/${{ env.PRODUCT }}-${ARGS}"
 
+      - name: Check for release
+        id: is-release
+        shell: bash
+        run: |
+          unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/v[0-9].* ]]; then IS_RELEASE='true' ; fi
+          echo ::set-output name=IS_RELEASE::${IS_RELEASE}
+
       - name: Extract version from tag
+        if: steps.is-release.outputs.IS_RELEASE
         id: extract_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           echo "::set-env name=VERSION::${VERSION}" 
 
       - name: Create tarball
+        if: steps.is-release.outputs.IS_RELEASE
         id: package
         shell: bash
         run: |
@@ -131,15 +140,9 @@ jobs:
           popd >/dev/null
           # Let subsequent steps know where to find the compressed package
           echo ::set-output name=PKG_PATH::"${PKG_STAGING}/${PKG_NAME}"
-          
-      - name: Check for release
-        id: is-release
-        shell: bash
-        run: |
-          unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/v[0-9].* ]]; then IS_RELEASE='true' ; fi
-          echo ::set-output name=IS_RELEASE::${IS_RELEASE}
 
       - name: Extract release notes
+        if: steps.is-release.outputs.IS_RELEASE
         id: release_notes
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
