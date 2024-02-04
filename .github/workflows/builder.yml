@@ -151,14 +151,11 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           RELEASE_NOTES=$(awk '/## \['$VERSION'\]/{flag=1;next} /## \[/ {flag=0} flag' CHANGELOG.md)
           echo $RELEASE_NOTES
-          # echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
-          # echo "::set-output name=body::${RELEASE_NOTES}"
-          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
-          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
-          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
-          echo "body<<EOF" >> $GITHUB_ENV
-          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          {
+            echo "body<<EOF"
+            echo "${RELEASE_NOTES}"
+            echo EOF
+          } >> $GITHUB_ENV
           echo ${{ env.body }}
 
       - name: Generate checksums
@@ -211,7 +208,7 @@ jobs:
           ls -lath
           tree
           # find . -name "*checksums.txt" -exec cat {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
-          find . -name "*-checksums.txt" | xargs cat > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -name "*-checksums.txt" ! -name "${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt" | xargs cat > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         if: steps.is-release.outputs.IS_RELEASE
