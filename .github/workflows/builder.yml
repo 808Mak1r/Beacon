@@ -162,8 +162,13 @@ jobs:
         shell: bash
         run: |
           cd package
-          find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt
-          mv ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt $GITHUB_WORKSPACE/
+          if [ "$GOOS" = "darwin" ]; then
+            find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec shasum -a 256 {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt
+          else
+            find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt
+          fi
+          # mv ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt $GITHUB_WORKSPACE/
+          cat ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt
 
       - name: Upload checksums
         if: steps.is-release.outputs.IS_RELEASE
@@ -206,7 +211,7 @@ jobs:
           pwd
           ls -lath
           tree
-          find . -name "*-checksums.txt" ! -name "Beacon-v0.1.3-checksums.txt" | xargs -I {} sh -c 'cat {}; echo'
+          # find . -name "*-checksums.txt" ! -name "Beacon-v0.1.3-checksums.txt" | xargs -I {} sh -c 'cat {}; echo'
           find . -name "*-checksums.txt" ! -name "${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt" | xargs cat > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
