@@ -167,7 +167,7 @@ jobs:
           else
             find . -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec sha256sum {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt
           fi
-          # mv ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt $GITHUB_WORKSPACE/
+          mv ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt $GITHUB_WORKSPACE/
           cat ${{ env.PRODUCT }}-${{ env.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}-checksums.txt
 
       - name: Upload checksums
