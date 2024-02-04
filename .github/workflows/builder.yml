@@ -152,7 +152,13 @@ jobs:
           RELEASE_NOTES=$(awk '/## \['$VERSION'\]/{flag=1;next} /## \[/ {flag=0} flag' CHANGELOG.md)
           echo $RELEASE_NOTES
           # echo "body=${RELEASE_NOTES}" >> $GITHUB_OUTPUT
-          echo "::set-output name=body::${RELEASE_NOTES}"
+          # echo "::set-output name=body::${RELEASE_NOTES}"
+          RELEASE_NOTES="${RELEASE_NOTES//'%'/'%25'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\n'/'%0A'}"
+          RELEASE_NOTES="${RELEASE_NOTES//$'\r'/'%0D'}"
+          echo "body<<EOF" >> $GITHUB_ENV
+          echo "${RELEASE_NOTES}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Generate checksums
         if: steps.is-release.outputs.IS_RELEASE
@@ -190,6 +196,8 @@ jobs:
         run: |
           unset IS_RELEASE ; if [[ $GITHUB_REF =~ ^refs/tags/v[0-9].* ]]; then IS_RELEASE='true' ; fi
           echo "IS_RELEASE=${IS_RELEASE}" >> $GITHUB_OUTPUT
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Download all artifacts
         if: steps.is-release.outputs.IS_RELEASE
@@ -201,11 +209,9 @@ jobs:
           pwd
           ls -lath
           tree
-          # for file in *.zip
-          # do
-          #   unzip $file
-          # done
-          find . -name "*-checksums.txt" -exec cat {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          # find . -name "*checksums.txt" -exec cat {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -name "*-checksums.txt" > temp.txt
+          cat temp.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         if: steps.is-release.outputs.IS_RELEASE
