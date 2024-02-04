@@ -159,6 +159,7 @@ jobs:
           echo "body<<EOF" >> $GITHUB_ENV
           echo "${RELEASE_NOTES}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+          echo ${{ env.body }}
 
       - name: Generate checksums
         if: steps.is-release.outputs.IS_RELEASE
@@ -179,7 +180,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: steps.is-release.outputs.IS_RELEASE
         with:
-          body: ${{ steps.release_notes.outputs.body }}
+          body: ${{ env.body }}
           files: |
             # ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
             ${{ steps.package.outputs.PKG_PATH }}
@@ -210,8 +211,7 @@ jobs:
           ls -lath
           tree
           # find . -name "*checksums.txt" -exec cat {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
-          find . -name "*-checksums.txt" > temp.txt
-          cat temp.txt > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -name "*-checksums.txt" | xargs cat > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
         if: steps.is-release.outputs.IS_RELEASE
