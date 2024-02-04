@@ -156,7 +156,6 @@ jobs:
             echo "${RELEASE_NOTES}"
             echo EOF
           } >> $GITHUB_ENV
-          echo ${{ env.body }}
 
       - name: Generate checksums
         if: steps.is-release.outputs.IS_RELEASE
@@ -207,7 +206,7 @@ jobs:
           pwd
           ls -lath
           tree
-          # find . -name "*checksums.txt" -exec cat {} \; > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
+          find . -name "*-checksums.txt" ! -name "Beacon-v0.1.3-checksums.txt" | xargs -I {} sh -c 'cat {}; echo'
           find . -name "*-checksums.txt" ! -name "${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt" | xargs cat > ${{ env.PRODUCT }}-${{ env.VERSION }}-checksums.txt
 
       - name: Publish archives and packages
